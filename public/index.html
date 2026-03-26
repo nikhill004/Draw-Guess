@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draw&Guess</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Landing Page -->
+    <div id="landing-page" class="page active">
+        <div class="landing-container">
+            <div class="logo">
+                <span class="logo-icon">✏️</span>
+                <h1>Draw&Guess</h1>
+                <p>Draw. Guess. Win.</p>
+            </div>
+            <div class="landing-card">
+                <div class="input-group">
+                    <label for="player-name">Your Name</label>
+                    <input type="text" id="player-name" placeholder="Enter your name" maxlength="16" autocomplete="off">
+                </div>
+                <div class="landing-actions">
+                    <button class="btn btn-primary" id="create-room-btn">Create Room</button>
+                    <div class="divider"><span>or</span></div>
+                    <div class="join-group">
+                        <input type="text" id="room-code-input" placeholder="Room Code" maxlength="6" autocomplete="off">
+                        <button class="btn btn-secondary" id="join-room-btn">Join</button>
+                    </div>
+                </div>
+                <div id="landing-error" class="error-msg hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lobby Page -->
+    <div id="lobby-page" class="page">
+        <div class="lobby-container">
+            <div class="lobby-header">
+                <h2>Waiting Room</h2>
+                <div class="room-code-display">
+                    Room: <span id="lobby-room-code"></span>
+                    <button class="copy-btn" id="copy-code-btn" title="Copy code">⧉</button>
+                </div>
+            </div>
+            <div class="lobby-body">
+                <div class="players-list" id="lobby-players"></div>
+                <div class="lobby-info">
+                    <p id="lobby-status">Waiting for players...</p>
+                    <button class="btn btn-primary hidden" id="start-game-btn">Start Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Word Selection Page -->
+    <div id="word-select-page" class="page">
+        <div class="word-select-container">
+            <h2>Choose a word to draw</h2>
+            <p>You have 10 seconds to pick</p>
+            <div class="word-options" id="word-options"></div>
+        </div>
+    </div>
+
+    <!-- Game Page -->
+    <div id="game-page" class="page">
+        <div class="game-layout">
+
+            <!-- Top Bar -->
+            <div class="game-topbar">
+                <div class="topbar-left">
+                    <span class="round-info" id="round-info">Round 1 / 3</span>
+                </div>
+                <div class="topbar-center">
+                    <div class="word-display" id="word-display">_ _ _ _ _</div>
+                    <div class="drawer-info" id="drawer-info"></div>
+                </div>
+                <div class="topbar-right">
+                    <div class="timer-wrap">
+                        <div class="timer" id="timer">60</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Area -->
+            <div class="game-main">
+
+                <!-- Players Sidebar -->
+                <div class="players-sidebar" id="players-sidebar"></div>
+
+                <!-- Canvas Area -->
+                <div class="canvas-area">
+                    <canvas id="drawing-canvas"></canvas>
+                    <div class="drawing-tools" id="drawing-tools">
+                        <div class="tool-group">
+                            <button class="tool-btn active" id="tool-pen" title="Pen">✏️</button>
+                            <button class="tool-btn" id="tool-eraser" title="Eraser">⬜</button>
+                        </div>
+                        <div class="tool-group">
+                            <div class="color-palette" id="color-palette"></div>
+                        </div>
+                        <div class="tool-group">
+                            <label class="size-label">Size</label>
+                            <input type="range" id="brush-size" min="2" max="40" value="6">
+                        </div>
+                        <div class="tool-group">
+                            <button class="tool-btn danger" id="clear-canvas-btn" title="Clear">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Sidebar -->
+                <div class="chat-sidebar">
+                    <div class="chat-messages" id="chat-messages"></div>
+                    <div class="chat-input-wrap">
+                        <input type="text" id="chat-input" placeholder="Type your guess..." maxlength="60" autocomplete="off">
+                        <button class="btn btn-primary" id="chat-send-btn">Send</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Overlays -->
+        <div class="overlay hidden" id="correct-overlay">
+            <div class="overlay-content correct">
+                <div class="overlay-icon">🎉</div>
+                <div class="overlay-text" id="correct-overlay-text">You guessed it!</div>
+            </div>
+        </div>
+
+        <div class="overlay hidden" id="word-reveal-overlay">
+            <div class="overlay-content reveal">
+                <p>The word was</p>
+                <div class="revealed-word" id="revealed-word-text"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Page -->
+    <div id="results-page" class="page">
+        <div class="results-container">
+            <h2>Game Over</h2>
+            <div class="results-list" id="results-list"></div>
+            <button class="btn btn-primary" id="play-again-btn">Back to Lobby</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
