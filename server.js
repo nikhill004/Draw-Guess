@@ -1,8 +1,7 @@
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
-const { v4: uuidv4 } = require('uuid');
-const path = require('path');
+
 
 const app = express();
 const server = http.createServer(app);
@@ -142,8 +141,33 @@ class GameRoom {
         if (nextDrawer) {
             this.currentDrawer = nextDrawer;
             this.gameState = 'choosing';
+
+            // Notify all players of new state
+            io.to(this.id).emit('gameState', {
+                room: {
+                    id: this.id,
+                    players: Array.from(this.players.values()),
+                    gameState: this.gameState,
+                    currentRound: this.currentRound,
+                    maxRounds: this.maxRounds,
+                    currentDrawer: this.currentDrawer
+                }
+            });
+
+            // Send word options to the new drawer
+            const wordOptions = this.generateWordOptions();
+            io.to(this.currentDrawer.id).emit('wordOptions', wordOptions);
         } else {
             this.gameState = 'finished';
+            io.to(this.id).emit('gameState', {
+                room: {
+                    id: this.id,
+                    players: Array.from(this.players.values()),
+                    gameState: this.gameState,
+                    currentRound: this.currentRound,
+                    maxRounds: this.maxRounds
+                }
+            });
         }
     }
 
@@ -155,9 +179,12 @@ class GameRoom {
         if (guess.toLowerCase().trim() === this.currentWord.toLowerCase()) {
             this.guessedPlayers.add(playerId);
             
-            // Award points based on order
+            // Award points to guesser based on order
             const points = [10, 8, 6, 4][this.guessedPlayers.size - 1] || 2;
             this.players.get(playerId).score += points;
+
+            // Award drawer 3 pts per correct guesser
+            this.players.get(this.currentDrawer.id).score += 3;
             
             // If all players guessed, end the phase
             if (this.guessedPlayers.size === this.players.size - 1) {
@@ -184,6 +211,7 @@ io.on('connection', (socket) => {
         socket.emit('gameState', {
             room: {
                 id: room.id,
+                hostId: room.hostId,
                 players: Array.from(room.players.values()),
                 gameState: room.gameState,
                 currentRound: room.currentRound,
@@ -211,6 +239,7 @@ io.on('connection', (socket) => {
         io.to(roomId).emit('gameState', {
             room: {
                 id: room.id,
+                hostId: room.hostId,
                 players: Array.from(room.players.values()),
                 gameState: room.gameState,
                 currentRound: room.currentRound,
@@ -368,6 +397,7 @@ io.on('connection', (socket) => {
                     io.to(roomId).emit('gameState', {
                         room: {
                             id: room.id,
+                            hostId: room.hostId,
                             players: Array.from(room.players.values()),
                             gameState: room.gameState,
                             currentRound: room.currentRound,
